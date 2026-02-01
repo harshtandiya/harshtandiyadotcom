@@ -2,7 +2,7 @@
 @import "tailwindcss";
 
 @layer base {
-  a {
+  a:not(.no-style) {
     @apply underline hover:bg-black hover:text-white!;
   }
 }
