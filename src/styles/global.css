@@ -2,6 +2,10 @@
 @import "tailwindcss";
 
 @layer base {
+  html {
+    @apply bg-[#f8f9fa];
+  }
+
   a:not(.no-style) {
     @apply underline hover:bg-black hover:text-white!;
   }
