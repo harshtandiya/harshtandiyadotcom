@@ -7,10 +7,6 @@
     "global_fetch_strictly_public"
   ],
 	"pages_build_output_dir": "./dist",
-	"assets": {
-		"binding": "ASSETS",
-		"directory": "./dist"
-	},
 	"observability": {
     "enabled": true
   }
