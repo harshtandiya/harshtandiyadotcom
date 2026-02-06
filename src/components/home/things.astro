@@ -1,17 +1,38 @@
+---
+import LinkWithSound from "@/components/common/LinkWithSound";
+---
+
 <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-  <div>
-    <a href="/thoughts" class="font-medium no-underline">Thoughts</a>
-  </div>
-
-  <div>
-    <a href="/projects" class="font-medium no-underline">Projects</a>
-  </div>
-
-  <div>
-    <a href="/music" class="font-medium no-underline">Music I listen to</a>
-  </div>
-
-  <div>
-    <a href="/books" class="font-medium no-underline">Books I'm reading</a>
-  </div>
+  <LinkWithSound
+    href="/thoughts"
+    target="_self"
+    client:load
+    className="no-underline"
+  >
+    Thoughts
+  </LinkWithSound>
+  <LinkWithSound
+    href="/projects"
+    target="_self"
+    client:load
+    className="no-underline"
+  >
+    Projects
+  </LinkWithSound>
+  <LinkWithSound
+    href="/music"
+    target="_self"
+    client:load
+    className="no-underline"
+  >
+    Music I listen to
+  </LinkWithSound>
+  <LinkWithSound
+    href="/books"
+    target="_self"
+    client:load
+    className="no-underline"
+  >
+    Books I'm reading
+  </LinkWithSound>
 </div>
