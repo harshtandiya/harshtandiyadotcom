@@ -9,8 +9,16 @@
     <title>Harsh Tandiya</title>
   </head>
   <body>
-    <div class="mx-auto max-w-3xl w-full px-6">
-      <slot />
+    <div class="grid grid-cols-1 md:grid-cols-[1fr_auto_1fr] gap-12">
+      <div class="p-6 h-fit">
+        <slot name="left-sidebar" />
+      </div>
+      <div class="max-w-3xl w-full px-6">
+        <slot />
+      </div>
+      <div class="p-6 h-fit">
+        <slot name="right-sidebar" />
+      </div>
     </div>
   </body>
 </html>
