@@ -35,7 +35,6 @@ const LinkWithSound = ({
       >
         {children}
       </a>
-      <slot name="icon" />
     </div>
   );
 };
