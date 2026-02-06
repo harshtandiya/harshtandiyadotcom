@@ -1,6 +1,10 @@
 ---
 import "../styles/global.css";
+
+const { class: className } = Astro.props;
+const wrapperClass = ["max-w-3xl w-full px-6 mx-auto", className].filter(Boolean).join(" ");
 ---
+
 <!doctype html>
 <html lang="en">
   <head>
@@ -12,16 +16,8 @@ import "../styles/global.css";
     <title>Harsh Tandiya</title>
   </head>
   <body>
-    <div class="grid grid-cols-1 md:grid-cols-[1fr_auto_1fr] gap-12">
-      <div class="p-6 h-fit">
-        <slot name="left-sidebar" />
-      </div>
-      <div class="max-w-3xl w-full px-6">
-        <slot />
-      </div>
-      <div class="p-6 h-fit">
-        <slot name="right-sidebar" />
-      </div>
+    <div class={wrapperClass}>
+      <slot />
     </div>
   </body>
 </html>
