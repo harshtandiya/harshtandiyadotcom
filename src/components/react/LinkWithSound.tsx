@@ -15,14 +15,14 @@ const LinkWithSound = ({
 }) => {
   const handleClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
     e.preventDefault();
-    playClickSound();
     setTimeout(() => {
       if (target === "_blank") {
         window.open(href, "_blank", "noopener,noreferrer");
       } else {
         window.location.href = href;
       }
-    }, 150);
+    }, 100);
+    playClickSound();
   };
   return (
     <div className="flex items-center gap-2">
