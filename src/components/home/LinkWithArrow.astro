@@ -3,9 +3,9 @@ const { label } = Astro.props;
 import { ArrowRight } from "@lucide/astro";
 ---
 
-<div class="flex items-center group gap-1">
+<div class="flex items-center gap-1">
   {label}
   <ArrowRight
-    class="w-4 h-4 text-gray-400 group-hover:translate-x-1 group-hover:text-gray-900 transition-all duration-200"
+    class="w-4 h-4 text-gray-400 transition-all duration-200 group-[&:is(:hover,:focus)]:translate-x-1 group-[&:is(:hover,:focus)]:text-gray-900"
   />
 </div>

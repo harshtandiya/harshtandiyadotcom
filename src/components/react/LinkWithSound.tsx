@@ -31,7 +31,7 @@ const LinkWithSound = ({
         target={target}
         rel={rel}
         onClick={handleClick}
-        className={className}
+        className={`group ${className ?? ""}`}
       >
         {children}
       </a>
