@@ -3,7 +3,10 @@ import "../styles/global.css";
 import Footer from "@/components/home/footer.astro";
 
 const { class: className } = Astro.props;
-const wrapperClass = ["max-w-3xl w-full px-6 mx-auto", className]
+const wrapperClass = [
+  "max-w-3xl w-full px-6 mx-auto min-h-screen flex flex-col",
+  className,
+]
   .filter(Boolean)
   .join(" ");
 ---
@@ -18,9 +21,11 @@ const wrapperClass = ["max-w-3xl w-full px-6 mx-auto", className]
     <meta name="generator" content={Astro.generator} />
     <title>Harsh Tandiya</title>
   </head>
-  <body>
+  <body class="min-h-screen">
     <div class={wrapperClass}>
-      <slot />
+      <main class="flex-1">
+        <slot />
+      </main>
       <Footer />
     </div>
   </body>
