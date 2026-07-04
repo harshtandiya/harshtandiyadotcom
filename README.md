@@ -1,12 +1,10 @@
 ## Code for [harshtandiya.com](https://www.harshtandiya.com)
 
-<style>
-  @media (prefers-color-scheme: dark) {
-    .readme-mascot { filter: invert(1); }
-  }
-</style>
 <div>
-    <img class="readme-mascot" style="margin: 20px 0px;" align="right" alt="Image of a cat that I use as my mascot" src="./src/assets/neko/OgNeko.svg" />
+    <picture>
+        <source media="(prefers-color-scheme: dark)" srcset="./.github/assets/OgNeko-white.svg">
+        <img style="margin: 20px 0px;" align="right" alt="Image of a cat that I use as my mascot" src="./src/assets/neko/OgNeko.svg" />
+    </picture>
     <div>
         <p>
             This repo comprises the code for my personal website at <a href="https://harshtandiya.com">harshtandiya.com</a>
