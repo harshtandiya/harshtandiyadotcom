@@ -1,5 +1,6 @@
 ---
 import "../styles/global.css";
+import { ClientRouter } from "astro:transitions";
 import Footer from "@/components/home/footer.astro";
 
 const { class: className } = Astro.props;
@@ -20,6 +21,7 @@ const wrapperClass = [
     <link rel="icon" href="/favicon.ico" />
     <meta name="generator" content={Astro.generator} />
     <title>Harsh Tandiya</title>
+    <ClientRouter />
   </head>
   <body class="min-h-screen">
     <script>
