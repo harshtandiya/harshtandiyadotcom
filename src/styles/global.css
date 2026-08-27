@@ -21,6 +21,14 @@
   }
 }
 
+/* Navigation is frequent, and the pages have distinct mascots that should
+   read as distinct. Swap instantly instead of crossfading the whole page. */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+
 @theme {
   --font-sans: "Geist", sans-serif;
 
