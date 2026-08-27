@@ -27,3 +27,28 @@
   /* Stronger than the built-in ease-out, which is too weak to read as intentional. */
   --ease-out-strong: cubic-bezier(0.23, 1, 0.32, 1);
 }
+
+/* Homepage sections cascade in under the hero. The hero itself is not
+   staggered: it is the page anchor, it should already be there, and it
+   holds the mascot that carries its own view transition. */
+@media (prefers-reduced-motion: no-preference) {
+  .stagger > *:nth-child(n + 2) {
+    opacity: 0;
+    animation: rise 300ms var(--ease-out-strong) forwards;
+  }
+
+  .stagger > *:nth-child(3) {
+    animation-delay: 60ms;
+  }
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
