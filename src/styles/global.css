@@ -7,7 +7,17 @@
   }
 
   a:not(.no-style) {
-    @apply underline hover:bg-black hover:text-white!;
+    @apply underline transition-colors duration-150 ease-out-strong hover:bg-black hover:text-white!;
+  }
+
+  /* Nav and icon links: block-level enough to take a transform, so they can
+     acknowledge a press. Prose links stay inline so they can still wrap. */
+  a.no-style {
+    @apply inline-block transition-transform duration-150 ease-out-strong active:scale-[0.97];
+  }
+
+  a:focus-visible {
+    @apply rounded-sm outline-2 outline-offset-2 outline-black;
   }
 }
 
