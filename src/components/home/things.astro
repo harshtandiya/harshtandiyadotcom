@@ -1,29 +1,18 @@
 ---
-import LinkWithSound from "@/components/react/LinkWithSound";
 import LinkWithArrow from "./LinkWithArrow.astro";
 ---
 
 <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-  <LinkWithSound
-    client:load
-    href="/thoughts"
-    target="_self"
-    className="no-style"
-  >
+  <a href="/thoughts" class="no-style group -m-2 p-2">
     <LinkWithArrow label="Thoughts" />
-  </LinkWithSound>
-  <LinkWithSound
-    client:load
-    href="/projects"
-    target="_self"
-    className="no-style"
-  >
+  </a>
+  <a href="/projects" class="no-style group -m-2 p-2">
     <LinkWithArrow label="Projects" />
-  </LinkWithSound>
-  <LinkWithSound client:load href="/music" target="_self" className="no-style">
+  </a>
+  <a href="/music" class="no-style group -m-2 p-2">
     <LinkWithArrow label="Music I listen to" />
-  </LinkWithSound>
-  <LinkWithSound client:load href="/books" target="_self" className="no-style">
+  </a>
+  <a href="/books" class="no-style group -m-2 p-2">
     <LinkWithArrow label="Books I'm reading" />
-  </LinkWithSound>
+  </a>
 </div>
