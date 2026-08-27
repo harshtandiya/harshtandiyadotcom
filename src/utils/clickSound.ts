@@ -13,5 +13,5 @@ export function playClickSound() {
   if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
   const audio = getAudio();
   audio.currentTime = 0;
-  audio.play();
+  audio.play().catch(() => {});
 }
