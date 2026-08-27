@@ -13,4 +13,7 @@
 
 @theme {
   --font-sans: "Geist", sans-serif;
+
+  /* Stronger than the built-in ease-out, which is too weak to read as intentional. */
+  --ease-out-strong: cubic-bezier(0.23, 1, 0.32, 1);
 }
