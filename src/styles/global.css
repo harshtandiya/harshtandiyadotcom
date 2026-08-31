@@ -21,42 +21,65 @@
   }
 }
 
+@theme {
+  --font-sans: "Geist", sans-serif;
+
+  /* Stronger than the built-in ease-out, which is too weak to read as intentional. */
+  --ease-out-strong: cubic-bezier(0.23, 1, 0.32, 1);
+  /* Exits get a curve that pulls away rather than easing out of it. */
+  --ease-in-strong: cubic-bezier(0.6, 0, 0.8, 1);
+
+  /* The one entry/exit pair for the whole site: fade plus a short blur.
+     `animate-appear` / `animate-disappear` are Tailwind utilities, so any
+     element can opt in. Both run `both` fill, so a delayed element holds its
+     start frame instead of flashing at full opacity first.
+
+     Optional per-element travel: set --appear-y (e.g. `[--appear-y:20px]`).
+     Defaults to 0, which keeps the pair pure fade and safe anywhere. */
+  --animate-appear: appear 500ms var(--ease-out-strong) both;
+  --animate-disappear: disappear 300ms var(--ease-in-strong) both;
+
+  @keyframes appear {
+    from {
+      opacity: 0;
+      filter: blur(6px);
+      transform: translateY(var(--appear-y, 0));
+    }
+    to {
+      opacity: 1;
+      filter: none;
+      transform: none;
+    }
+  }
+
+  @keyframes disappear {
+    from {
+      opacity: 1;
+      filter: none;
+      transform: none;
+    }
+    to {
+      opacity: 0;
+      filter: blur(6px);
+      transform: translateY(var(--appear-y, 0));
+    }
+  }
+}
+
+/* Motion sickness comes from travel, not from a fade. Zeroing the offset in
+   one place covers every current and future user of the pair. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  ::before,
+  ::after {
+    --appear-y: 0px;
+  }
+}
+
 /* Navigation is frequent, and the pages have distinct mascots that should
    read as distinct. Swap instantly instead of crossfading the whole page. */
 ::view-transition-old(root),
 ::view-transition-new(root) {
   animation: none;
   mix-blend-mode: normal;
-}
-
-@theme {
-  --font-sans: "Geist", sans-serif;
-
-  /* Stronger than the built-in ease-out, which is too weak to read as intentional. */
-  --ease-out-strong: cubic-bezier(0.23, 1, 0.32, 1);
-}
-
-/* Homepage sections cascade in under the hero. The hero itself is not
-   staggered: it is the page anchor, it should already be there, and it
-   holds the mascot that carries its own view transition. */
-@media (prefers-reduced-motion: no-preference) {
-  .stagger > *:nth-child(n + 2) {
-    opacity: 0;
-    animation: rise 300ms var(--ease-out-strong) forwards;
-  }
-
-  .stagger > *:nth-child(3) {
-    animation-delay: 60ms;
-  }
-}
-
-@keyframes rise {
-  from {
-    opacity: 0;
-    transform: translateY(8px);
-  }
-  to {
-    opacity: 1;
-    transform: none;
-  }
 }
