@@ -7,8 +7,6 @@ import Things from "@/components/home/things.astro";
 
 <Layout>
   <div class="flex flex-col justify-between h-svh">
-    <!-- The sections cascade in one beat apart. --appear-y is inherited, so
-         the travel is set once here and the delays stay next to the content. -->
     <div class="mt-12 flex flex-col gap-12 [--appear-y:20px]">
       <div class="animate-appear"><HomeHero /></div>
       <div class="animate-appear [animation-delay:80ms]"><Things /></div>
