@@ -14,4 +14,7 @@ export default defineConfig({
 
   adapter: cloudflare(),
   integrations: [react()],
+
+  // Warm pages on hover; ClientRouter fetches before it swaps.
+  prefetch: { prefetchAll: true },
 });
