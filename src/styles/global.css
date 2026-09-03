@@ -22,6 +22,7 @@
 
 @theme {
   --font-sans: "Geist", sans-serif;
+  --font-hand: "Gloria Hallelujah", cursive;
 
   /* The built-in easings are too weak to read as intentional. */
   --ease-out-strong: cubic-bezier(0.23, 1, 0.32, 1);
