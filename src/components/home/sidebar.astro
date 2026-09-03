@@ -46,6 +46,7 @@ const isActive = (href: string) =>
             <li>
               <a
                 href={item.href}
+                data-nav-href={item.href}
                 aria-current={active ? "page" : undefined}
                 data-cuelume-press
                 class:list={[
@@ -112,3 +113,25 @@ const isActive = (href: string) =>
   </div>
 </aside>
 
+<script>
+  // The sidebar persists across ClientRouter navigations (transition:persist),
+  // so the server-rendered active state would go stale — re-sync it on every page load.
+  function syncSidebarNav() {
+    const path = window.location.pathname;
+    document.querySelectorAll("a[data-nav-href]").forEach((el) => {
+      const href = el.getAttribute("data-nav-href") ?? "/";
+      const active =
+        href === "/" ? path === "/" : path === href || path.startsWith(href + "/");
+      el.classList.toggle("text-black", active);
+      el.classList.toggle("text-gray-500", !active);
+      if (active) {
+        el.setAttribute("aria-current", "page");
+      } else {
+        el.removeAttribute("aria-current");
+      }
+    });
+  }
+
+  document.addEventListener("astro:page-load", syncSidebarNav);
+  syncSidebarNav();
+</script>
