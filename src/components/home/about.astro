@@ -1,7 +1,15 @@
 ---
+import { Image } from "astro:assets";
+import ogNeko from "@/assets/neko/OgNeko.svg";
 ---
 
 <div class="flex flex-col gap-4 items-start [--appear-y:20px]">
+  <Image
+    src={ogNeko}
+    alt="Cat that I use as my mascot"
+    class="w-auto h-12"
+    loading="eager"
+  />
   <h1 class="text-xl font-hand">About</h1>
   <p>
     Crafting polished software and experiences at

@@ -1,7 +1,4 @@
 ---
-import { Image } from "astro:assets";
-import ogNeko from "@/assets/neko/OgNeko.svg";
-
 const NAV = [
   { href: "/", label: "About" },
   { href: "/thoughts", label: "Thoughts" },
@@ -21,20 +18,12 @@ const isActive = (href: string) =>
 >
   <a
     href="/"
-    class="no-style flex md:flex-col gap-3 md:gap-4 items-center md:items-start"
+    class="no-style block"
     data-cuelume-press
     aria-label="Harsh Tandiya — home"
   >
-    <Image
-      src={ogNeko}
-      class="w-auto h-10 md:h-12"
-      alt="Cat that I use as my mascot"
-      loading="eager"
-    />
-    <span class="flex flex-col gap-0.5">
-      <span class="text-xl font-semibold leading-tight">Harsh Tandiya</span>
-      <span class="text-sm text-gray-500 leading-tight">Software Engineer</span>
-    </span>
+    <span class="block text-xl font-semibold leading-tight">Harsh Tandiya</span>
+    <span class="block mt-0.5 text-sm text-gray-500 leading-tight">Software Engineer</span>
   </a>
 
   <nav aria-label="Primary">
