@@ -1,9 +1,16 @@
 ---
 import Layout from "@/layouts/Layout.astro";
+import { Image } from "astro:assets";
+import sunglassKitty from "@/assets/neko/sunglassKitty.svg";
 ---
 
 <Layout>
   <div class="animate-appear flex flex-col gap-4 items-start [--appear-y:20px]">
+    <Image
+      src={sunglassKitty}
+      alt="Sunglass Kitty Illustration"
+      class="w-auto h-12"
+    />
     <h1 class="text-xl font-hand">Projects</h1>
     <p class="text-gray-400 italic font-base">Something will come here eventually.</p>
   </div>
