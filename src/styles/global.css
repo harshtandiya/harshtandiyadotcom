@@ -48,22 +48,20 @@
   /* The built-in easings are too weak to read as intentional. */
   --ease-out-strong: cubic-bezier(0.23, 1, 0.32, 1);
   --ease-in-strong: cubic-bezier(0.6, 0, 0.8, 1);
+  --ease-out-quad: cubic-bezier(0.25, 0.46, 0.45, 0.94);
 
-  /* Site-wide entry/exit pair. Opt in with `animate-appear` / `animate-disappear`,
-     add travel with `[--appear-y:20px]`. */
-  --animate-appear: appear 500ms var(--ease-out-strong) both;
+  /* Site-wide entry/exit pair. Opt in with `animate-appear` / `animate-disappear`. */
+  --animate-appear: appear 500ms var(--ease-out-quad) both;
   --animate-disappear: disappear 300ms var(--ease-in-strong) both;
 
   @keyframes appear {
     from {
       opacity: 0;
-      filter: blur(6px);
-      transform: translateY(var(--appear-y, 0));
+      filter: blur(8px);
     }
     to {
       opacity: 1;
       filter: none;
-      transform: none;
     }
   }
 
@@ -71,24 +69,15 @@
     from {
       opacity: 1;
       filter: none;
-      transform: none;
     }
     to {
       opacity: 0;
-      filter: blur(6px);
-      transform: translateY(var(--appear-y, 0));
+      filter: blur(8px);
     }
   }
 }
 
-/* Travel is the motion-sickness risk, not the fade. */
 @media (prefers-reduced-motion: reduce) {
-  *,
-  ::before,
-  ::after {
-    --appear-y: 0px;
-  }
-
   a:not(.no-style)::after {
     transition: none;
   }
