@@ -54,6 +54,32 @@ import Connect from "@/components/home/connect.astro";
         },
         { capture: true },
       );
+
+      // Pages animate themselves in, but the outgoing page is swapped out
+      // instantly. Blur it away first by holding the router's loader until the
+      // exit animation finishes.
+      document.addEventListener("astro:before-preparation", (ev) => {
+        const main = document.querySelector("main");
+        if (!main) return;
+
+        const load = ev.loader;
+        ev.loader = async () => {
+          main.classList.add("animate-disappear");
+          // Read the duration off the animation itself rather than repeating
+          // the 300ms from `--animate-disappear`. No animation (reduced motion,
+          // unsupported) means nothing to wait on.
+          const exits = main
+            .getAnimations()
+            .map((animation) => animation.finished.catch(() => {}));
+          await Promise.all([load(), ...exits]);
+        };
+      });
+
+      // The swap replaces <main>, so the class normally leaves with it — this
+      // only matters when a navigation is aborted partway.
+      document.addEventListener("astro:page-load", () => {
+        document.querySelector("main")?.classList.remove("animate-disappear");
+      });
     </script>
     <div
       class="max-w-5xl w-full px-6 mr-auto min-h-screen flex flex-col md:flex-row md:gap-12"
