@@ -30,6 +30,30 @@ import Connect from "@/components/home/connect.astro";
       setEnabled(!matchMedia("(prefers-reduced-motion: reduce)").matches);
       setVolume(0.3);
       bind();
+
+      // A link to the page you are already on still round-trips through the
+      // router and replays the entry animation. Swallow it before ClientRouter's
+      // own (bubble-phase, head-registered) handler sees the click.
+      document.addEventListener(
+        "click",
+        (ev) => {
+          if (ev.defaultPrevented || ev.button !== 0) return;
+          if (ev.metaKey || ev.ctrlKey || ev.shiftKey || ev.altKey) return;
+
+          const target = ev.composed ? ev.composedPath()[0] : ev.target;
+          const link = target instanceof Element ? target.closest("a[href]") : null;
+          if (!(link instanceof HTMLAnchorElement)) return;
+          if (link.hasAttribute("download")) return;
+          if (link.target && link.target !== "_self") return;
+
+          const url = new URL(link.href, location.href);
+          if (url.origin !== location.origin || url.hash) return;
+          if (url.pathname === location.pathname && url.search === location.search) {
+            ev.preventDefault();
+          }
+        },
+        { capture: true },
+      );
     </script>
     <div
       class="max-w-5xl w-full px-6 mr-auto min-h-screen flex flex-col md:flex-row md:gap-12"
