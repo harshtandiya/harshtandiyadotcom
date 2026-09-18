@@ -5,14 +5,14 @@ import SongList from "@/components/music/SongList.astro";
 ---
 
 <Layout wide>
-  <div class="animate-appear flex flex-col gap-4 items-start">
+  <div class="animate-appear flex flex-col gap-4 items-start my-6 px-4">
     <h1 class="sr-only">Music</h1>
-    <div data-player class="w-full grid gap-10 lg:grid-cols-2 lg:items-start">
-      <div class="lg:sticky lg:top-12">
-        <Turntable />
-      </div>
-      <div class="lg:order-first">
+    <div data-player class="w-full flex flex-col-reverse gap-12 lg:flex-row">
+      <div class="lg:flex-1">
         <SongList />
+      </div>
+      <div class="lg:sticky lg:top-0 lg:-mt-12 lg:w-1/2 lg:h-svh grid items-center">
+        <Turntable />
       </div>
     </div>
   </div>
