@@ -1,19 +1,12 @@
 ---
 import Layout from "@/layouts/Layout.astro";
-import { Image } from "astro:assets";
-import musicKitty from "@/assets/neko/musicKitty.svg";
 import Turntable from "@/components/music/Turntable.astro";
 import SongList from "@/components/music/SongList.astro";
 ---
 
 <Layout wide>
   <div class="animate-appear flex flex-col gap-4 items-start">
-    <Image
-      src={musicKitty}
-      alt="Music Kitty Illustration"
-      class="w-auto h-[63px]"
-    />
-    <h1 class="text-xl font-hand">Music</h1>
+    <h1 class="sr-only">Music</h1>
     <div data-player class="w-full grid gap-10 lg:grid-cols-2 lg:items-start">
       <div class="lg:sticky lg:top-12">
         <Turntable />
