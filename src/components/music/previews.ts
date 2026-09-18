@@ -23,7 +23,7 @@ async function itunes(path: string, params: Record<string, string>): Promise<Res
 }
 
 // Prefer "Nights" over "Nights (Mixed)" when both exist.
-function pick(results: Result[], { title, artist }: Song) {
+export function pick(results: Result[], { title, artist }: Song) {
   const tracks = results.filter((r) => r.previewUrl && r.trackName && norm(r.artistName).includes(norm(artist)));
   return (
     tracks.find((r) => norm(r.trackName!) === norm(title)) ??

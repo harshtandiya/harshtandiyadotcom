@@ -3,10 +3,10 @@ import { SONGS } from "./songs";
 // Drives one record player. Visuals live in CSS, keyed on `data-phase`:
 //   empty → entering → playing → exiting → (entering the next record | empty)
 // This only flips phases and waits for each phase's finite animations to end,
-// so every prototype can move differently while sharing the same sequencing.
+// so timing lives in one place: the CSS.
 export function mountPlayer(root: HTMLElement) {
   const buttons = [...root.querySelectorAll<HTMLButtonElement>("[data-song]")];
-  const status = root.querySelector<HTMLElement>("[data-status]");
+  const status = root.querySelector<HTMLElement>("[data-status]")!;
 
   let playing: number | null = null;
   let wanted: number | null = null;
@@ -37,16 +37,14 @@ export function mountPlayer(root: HTMLElement) {
   const label = (i: number) => {
     const song = SONGS[i];
     root.style.setProperty("--label", song.label);
-    root.querySelectorAll("[data-title]").forEach((el) => (el.textContent = song.title));
-    root.querySelectorAll("[data-artist]").forEach((el) => (el.textContent = song.artist));
+    root.querySelector("[data-title]")!.textContent = song.title;
+    root.querySelector("[data-artist]")!.textContent = song.artist;
   };
 
   const sync = () => {
     buttons.forEach((b, i) => b.setAttribute("aria-pressed", String(i === wanted)));
-    if (status) {
-      status.textContent =
-        wanted === null ? "Nothing playing." : `Playing ${SONGS[wanted].title} by ${SONGS[wanted].artist}.`;
-    }
+    status.textContent =
+      wanted === null ? "Nothing playing." : `Playing ${SONGS[wanted].title} by ${SONGS[wanted].artist}.`;
   };
 
   // Clicks can land mid-animation. Only the latest choice matters, so the loop
