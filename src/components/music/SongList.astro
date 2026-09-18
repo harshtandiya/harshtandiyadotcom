@@ -1,0 +1,27 @@
+---
+import { SONGS } from "./songs";
+import { getPreviews } from "./previews";
+
+const previews = await getPreviews();
+---
+
+<ol class="flex flex-col gap-1 min-w-0">
+  {
+    SONGS.map((song, i) => (
+      <li>
+        <button
+          type="button"
+          data-song={i}
+          data-preview={previews[i] ?? undefined}
+          data-cuelume-press
+          class="group w-full flex items-baseline gap-3 text-left py-1.5 cursor-pointer text-gray-500 hover:text-black aria-pressed:text-black transition-colors duration-150"
+        >
+          <span class="w-4 shrink-0 text-xs tabular-nums text-gray-400">{i + 1}</span>
+          <span class="truncate">{song.title}</span>
+          <span class="truncate text-xs text-gray-400">{song.artist}</span>
+        </button>
+      </li>
+    ))
+  }
+</ol>
+<p data-status class="sr-only" aria-live="polite"></p>
