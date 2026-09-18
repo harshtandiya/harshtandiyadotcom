@@ -1,246 +1,85 @@
 ---
-// A cream deck in real CSS 3D: a flat top-down drawing tilted back with
-// `rotateX`, so every part is just positioned on the plinth and lifted along Z.
-// Solid parts (platter, knob, spindle, blocks) are stacks of identical layers
-// (`.tt-stack`), which reads as a cylinder or block from any tilt.
-// Motion is keyed on the player root's `data-phase` (see player.ts).
+// Photo layers, stacked like Lightspark's Muji player: an empty deck, the
+// record, and the tonearm are separate cut-outs positioned in percentages of
+// the deck photo (1180 × 702), so the whole thing scales as one image.
 //
-// All coordinates are in container units of the deck width (100cqw × 64cqw top).
-
-const stack = (n: number) => Array.from({ length: n }, (_, i) => i);
+// Only the label turns. The grooves look the same at every angle, so the
+// record photo can stay still and its reflections stay put like a real one.
+// The deck is shot at a tilt, so the label is squashed by the platter's aspect
+// (0.711) and rotates inside the squash — it turns in the plane of the deck.
+//
+// Motion is keyed on the player root's `data-phase` (see player.ts).
 ---
 
-<div class="tt" aria-hidden="true">
-  <div class="tt-deck">
-    <div class="tt-front">
-      <span class="tt-foot tt-foot-l"></span>
-      <span class="tt-foot tt-foot-r"></span>
-    </div>
+<div class="tt">
+  <img class="tt-deck" src="/turntable/deck.webp" alt="" width="1180" height="702" />
 
-    <div class="tt-stack tt-hinge" style="left: 16cqw">
-      {stack(6).map((i) => <i style={`--i:${i}`} />)}
-    </div>
-    <div class="tt-stack tt-hinge" style="left: 74cqw">
-      {stack(6).map((i) => <i style={`--i:${i}`} />)}
-    </div>
-
-    <div class="tt-print tt-scale-l">
-      <span>−8</span><span>−4</span><span>0</span><span>+4</span><span>+8</span>
-    </div>
-    <div class="tt-print tt-scale-r">
-      <span>33</span><span>45</span><span>78</span>
-    </div>
-
-    <div class="tt-stack tt-platter">
-      {stack(5).map((i) => <i style={`--i:${i}`} />)}
-    </div>
-    <div class="tt-shadow"></div>
-
-    <div class="tt-disc">
-      <div class="tt-record"></div>
+  <div class="tt-disc">
+    <img src="/turntable/record.webp" alt="" width="730" height="519" />
+    <div class="tt-squash">
       <div class="tt-spin">
-        <svg class="tt-label" viewBox="0 0 100 100">
+        <svg class="tt-label" viewBox="0 0 100 100" aria-hidden="true">
           <defs>
             <path id="tt-arc" d="M 50 23 a 27 27 0 1 1 -0.01 0" fill="none"></path>
           </defs>
           <text class="tt-title"><textPath href="#tt-arc" data-title></textPath></text>
-          <text class="tt-artist" x="50" y="71" text-anchor="middle" data-artist></text>
-          <text class="tt-side" x="50" y="40" text-anchor="middle">33⅓ · SIDE A</text>
+          <text class="tt-artist" x="50" y="70" text-anchor="middle" data-artist></text>
+          <text class="tt-side" x="50" y="61" text-anchor="middle">33⅓ · SIDE A</text>
         </svg>
       </div>
-      <div class="tt-sheen"></div>
-    </div>
-
-    <div class="tt-stack tt-spindle">
-      {stack(6).map((i) => <i style={`--i:${i}`} />)}
-    </div>
-
-    <div class="tt-stack tt-knob">
-      {stack(8).map((i) => <i style={`--i:${i}`} />)}
-    </div>
-
-    <div class="tt-stack tt-slider">
-      {stack(5).map((i) => <i style={`--i:${i}`} />)}
-    </div>
-
-    <div class="tt-stack tt-rest">
-      {stack(7).map((i) => <i style={`--i:${i}`} />)}
-    </div>
-
-    <div class="tt-stack tt-base">
-      {stack(3).map((i) => <i style={`--i:${i}`} />)}
-    </div>
-
-    <div class="tt-arm">
-      <div class="tt-stack tt-weight">
-        {stack(8).map((i) => <i style={`--i:${i}`} />)}
-      </div>
-      <div class="tt-stack tt-pivot">
-        {stack(9).map((i) => <i style={`--i:${i}`} />)}
-      </div>
-      <div class="tt-tube"></div>
-      <div class="tt-collar"></div>
-      <div class="tt-head"></div>
     </div>
   </div>
+
+  <div class="tt-spindle"></div>
+
+  <!-- The START/STOP slider, cut out of the deck photo; the deck is filled in under it. -->
+  <div class="tt-slot"></div>
+  <button type="button" class="tt-power" data-power aria-label="Turntable power" aria-pressed="false" data-cuelume-press>
+    <img src="/turntable/slider.webp" alt="" width="70" height="93" />
+  </button>
+
+  <!-- ponytail: rotates in the image plane, not the deck's; fine at these small angles. -->
+  <img class="tt-arm" src="/turntable/arm.webp" alt="" width="205" height="716" />
 </div>
 
 <style is:global>
   .tt {
-    container-type: inline-size;
-    perspective: 1500px;
-    perspective-origin: 50% 20%;
-    padding: 2% 3% 6%;
-  }
-
-  .tt-deck {
     position: relative;
-    height: 64cqw;
-    transform: rotateX(38deg);
-    transform-style: preserve-3d;
-    border-radius: 1.2cqw;
-    background: linear-gradient(175deg, #f1ede4, #e7e2d6 60%, #ddd7ca);
-    box-shadow: inset 0 0 0 1px #0000000a;
+    container-type: inline-size;
   }
 
-  .tt-deck > * {
-    position: absolute;
-    transform-style: preserve-3d;
+  .tt img {
+    display: block;
+    width: 100%;
+    height: auto;
+    user-select: none;
+    -webkit-user-drag: none;
   }
 
-  /* Front edge, folded down off the plinth's front; feet hang under it. */
-  .tt-front {
-    left: 0;
-    right: 0;
-    top: 100%;
-    height: 7cqw;
-    transform-origin: top;
-    transform: rotateX(-90deg);
-    background: linear-gradient(#e2ddd1 0 16%, #cfc9bb 17%, #d9d3c6 22%, #cbc5b7);
-    border-radius: 0 0 0.6cqw 0.6cqw;
-  }
-
-  .tt-foot {
-    position: absolute;
-    top: 100%;
-    width: 12cqw;
-    height: 2.4cqw;
-    background: linear-gradient(90deg, #c7c1b3, #ddd8cc 40%, #bdb7a9);
-    border-radius: 0 0 50% 50% / 0 0 100% 100%;
-  }
-
-  .tt-foot-l {
-    left: 5cqw;
-  }
-
-  .tt-foot-r {
-    right: 5cqw;
-  }
-
-  /* Stacks: identical layers, each a step higher; the top layer gets the face colour. */
-  .tt-stack > i {
-    position: absolute;
-    inset: 0;
-    border-radius: inherit;
-    background: var(--side);
-    transform: translateZ(calc(var(--i) * var(--step, 0.3cqw)));
-  }
-
-  .tt-stack > i:last-child {
-    background: var(--top);
-  }
-
-  .tt-hinge {
-    top: -1cqw;
-    width: 9cqw;
-    height: 3cqw;
-    border-radius: 0.4cqw;
-    --side: #1c1c1c;
-    --top: #2b2b2b;
-    --step: 0.4cqw;
-  }
-
-  .tt-print {
-    display: flex;
-    justify-content: space-between;
-    border-top: 0.15cqw solid #9c9689;
-    padding-top: 0.5cqw;
-    font-size: 1.1cqw;
-    line-height: 1;
-    color: #8f897c;
-    letter-spacing: 0.05em;
-  }
-
-  .tt-scale-l {
-    left: 4cqw;
-    top: 59cqw;
-    width: 24cqw;
-  }
-
-  .tt-scale-r {
-    left: 79cqw;
-    top: 60.5cqw;
-    width: 16cqw;
-  }
-
-  .tt-platter,
-  .tt-shadow,
+  /* Record box inside the deck photo. */
   .tt-disc {
-    left: 11cqw;
-    top: 4cqw;
-    width: 58cqw;
-    height: 58cqw;
-    border-radius: 50%;
-  }
-
-  .tt-platter {
-    --side: #b8b5ae;
-    --top: #d9d7d1;
-  }
-
-  .tt-shadow {
-    transform: translateZ(1.3cqw);
-    background: radial-gradient(circle closest-side, #0000008c 60%, #0000 100%);
-    opacity: 0;
-  }
-
-  .tt-disc {
-    transform: translateZ(1.4cqw);
-    opacity: 0;
-  }
-
-  .tt-record,
-  .tt-spin,
-  .tt-sheen {
     position: absolute;
-    inset: 0;
-    border-radius: 50%;
+    left: 15.17%;
+    top: 5.41%;
+    width: 61.86%;
+    opacity: 0;
+    filter: drop-shadow(0 0.3cqw 0.4cqw #0000004d);
   }
 
-  .tt-record {
-    background:
-      /* gaps between tracks */
-      radial-gradient(
-        circle closest-side,
-        #0000 0 46%,
-        #ffffff1c 46.4%,
-        #0000 46.9% 58%,
-        #ffffff17 58.4%,
-        #0000 58.9% 70%,
-        #ffffff1c 70.4%,
-        #0000 70.9% 83%,
-        #ffffff14 83.4%,
-        #0000 83.9%
-      ),
-      /* grooves */
-      repeating-radial-gradient(circle closest-side, #0000 0 0.45%, #ffffff09 0.45% 0.7%),
-      radial-gradient(circle closest-side, #121212 0 95%, #2c2c2c 96% 98.6%, #080808 99.2%);
-    /* The centre hole lets the spindle through. */
-    mask: radial-gradient(circle, #0000 1.2%, #000 1.4%);
+  /* Label centred on the spindle; big enough to hide the photo's own label. */
+  .tt-squash {
+    position: absolute;
+    left: 49.86%;
+    top: 47.01%;
+    width: 46.6%;
+    aspect-ratio: 1;
+    translate: -50% -50%;
+    scale: 1 0.711;
   }
 
   .tt-spin {
-    inset: 33.5%;
+    position: absolute;
+    inset: 0;
     animation: tt-spin 1.8s linear infinite paused; /* 33⅓ rpm */
   }
 
@@ -254,10 +93,10 @@ const stack = (n: number) => Array.from({ length: n }, (_, i) => i);
     border-radius: 50%;
     background: radial-gradient(
       circle closest-side,
-      #efe7d5 0 63%,
-      #00000026 63.6%,
-      var(--label, #c8443a) 64.5% 97%,
-      #0000004d 99%
+      #efe7d5 0 71%,
+      #00000026 71.6%,
+      var(--label, #d4572f) 72.5% 98.5%,
+      #0000 99.5%
     );
     font-family: var(--font-sans);
   }
@@ -280,235 +119,104 @@ const stack = (n: number) => Array.from({ length: n }, (_, i) => i);
     fill: #3a332c80;
   }
 
-  /* Reflections stay put while the record turns under them. */
-  .tt-sheen {
-    background: conic-gradient(
-      from -35deg,
-      #fff0 0 18deg,
-      #ffffff40 34deg,
-      #fff0 56deg 180deg,
-      #ffffff2e 214deg,
-      #fff0 238deg
-    );
-    mask: radial-gradient(circle closest-side, #0000 34%, #000 37% 97%, #0000 98%);
-    pointer-events: none;
-  }
-
+  /* The label covers the photo's spindle, so draw one back on top. */
   .tt-spindle {
-    left: calc(40cqw - 0.6cqw);
-    top: calc(33cqw - 0.6cqw);
-    width: 1.2cqw;
-    height: 1.2cqw;
-    border-radius: 50%;
-    --side: #a88a4c;
-    --top: radial-gradient(circle at 35% 35%, #fff4cf, #c7a661);
-    --step: 0.45cqw;
-  }
-
-  .tt-knob {
-    left: 6cqw;
-    top: 47cqw;
-    width: 8cqw;
-    height: 8cqw;
-    border-radius: 50%;
-    --side: #b3261e;
-    --top: conic-gradient(#f4efe4, #dcd5c6, #f4efe4, #d6cfbf, #f4efe4);
-    --step: 0.4cqw;
-  }
-
-  /* Indicator notch on the knob; turns to "on" while playing. */
-  .tt-knob > i:last-child {
-    transition: rotate 400ms cubic-bezier(0.3, 1.4, 0.5, 1);
-  }
-
-  .tt-knob > i:last-child::after {
-    content: "";
     position: absolute;
-    left: 50%;
-    top: 8%;
-    width: 0.4cqw;
-    height: 2cqw;
-    translate: -50%;
-    border-radius: 1cqw;
-    background: #b3261e;
+    left: 45.34%;
+    top: 34.47%;
+    width: 1.36%;
+    height: 5.7%;
+    border-radius: 50% 50% 30% 30% / 30% 30% 12% 12%;
+    background: linear-gradient(90deg, #7d7a74, #f6f4ef 40%, #c9c6bf 60%, #8e8b85);
+    box-shadow: 0.25cqw 0.3cqw 0.4cqw #0000004d;
   }
 
-  [data-phase="playing"] .tt-knob > i:last-child {
-    rotate: 50deg;
-  }
-
-  .tt-slider {
-    left: 88cqw;
-    top: 52cqw;
-    width: 3.4cqw;
-    height: 5cqw;
-    border-radius: 0.4cqw;
-    --side: #cfc8b8;
-    --top: linear-gradient(#f5f1e8, #e4ded1);
-  }
-
-  .tt-rest {
-    left: calc(84cqw - 0.9cqw);
-    top: 47cqw;
-    width: 1.8cqw;
-    height: 1.8cqw;
-    border-radius: 0.3cqw;
-    --side: #1f1f1f;
-    --top: #333;
-  }
-
-  .tt-base {
-    left: calc(84cqw - 5.5cqw);
-    top: calc(12cqw - 5.5cqw);
-    width: 11cqw;
-    height: 11cqw;
-    border-radius: 50%;
-    --side: #b9b6ae;
-    --top: radial-gradient(circle closest-side, #2a2a2a 0 44%, #d6d4ce 47% 70%, #a9a69f 72%, #eceae5 90%);
-  }
-
-  /* The arm is a zero-size box at the pivot; everything hangs off (0, 0). */
-  .tt-arm {
-    left: 84cqw;
-    top: 12cqw;
-    width: 0;
-    height: 0;
-    rotate: 0deg;
-    translate: 0 0 1cqw;
-    transition:
-      translate 250ms ease-out,
-      rotate 750ms 250ms cubic-bezier(0.45, 0, 0.2, 1);
+  /* Pivot = the arm's bearing (33.17%, 16.06% of the cut-out), set on the deck's socket. */
+  .tt .tt-arm {
+    position: absolute;
+    left: 75.8%;
+    top: 2.35%;
+    width: 12.16%;
+    transform-origin: 33.17% 16.06%;
+    rotate: 3deg; /* resting clear of the START/STOP slider */
+    filter: drop-shadow(0.6cqw 0.9cqw 0.6cqw #00000038);
+    transition: rotate 800ms 250ms cubic-bezier(0.45, 0, 0.2, 1);
   }
 
   [data-phase="playing"] .tt-arm {
-    rotate: 32deg;
-    translate: 0 0 0;
-    transition:
-      rotate 750ms cubic-bezier(0.45, 0, 0.2, 1),
-      translate 300ms 750ms ease-in;
+    rotate: 29deg; /* needle just inside the lead-in groove */
+    transition-delay: 0ms;
   }
 
-  .tt-arm > * {
+  .tt-slot {
     position: absolute;
-    transform-style: preserve-3d;
-  }
-
-  .tt-weight {
-    left: -2.4cqw;
-    top: -9.5cqw;
-    width: 4.8cqw;
-    height: 6.5cqw;
-    border-radius: 0.8cqw;
-    --side: #151515;
-    --top: linear-gradient(90deg, #1b1b1b, #3a3a3a 45%, #161616);
-    translate: 0 0 1.6cqw;
-  }
-
-  .tt-pivot {
-    left: -2.5cqw;
-    top: -2.5cqw;
-    width: 5cqw;
-    height: 5cqw;
-    border-radius: 0.8cqw;
-    --side: #151515;
-    --top: #2f2f2f;
-  }
-
-  .tt-tube {
-    left: -0.45cqw;
-    top: 1cqw;
-    width: 0.9cqw;
-    height: 38cqw;
+    left: 86.7%;
+    top: 65.2%;
+    width: 0.9%;
+    height: 11%;
     border-radius: 1cqw;
-    background: linear-gradient(90deg, #8e8a82, #f6f3ec 45%, #a19d95);
-    transform: translateZ(2.6cqw);
-    box-shadow: 0 0 0 0.05cqw #0000001f;
+    background: #3b362f;
+    box-shadow: inset 0 0.2cqw 0.3cqw #000;
   }
 
-  .tt-collar {
-    left: -0.8cqw;
-    top: 31.5cqw;
-    width: 1.6cqw;
-    height: 2.4cqw;
-    border-radius: 0.3cqw;
-    background: linear-gradient(90deg, #8e1d17, #d8392e 45%, #9c211a);
-    transform: translateZ(2.7cqw);
+  .tt-power {
+    position: absolute;
+    left: 84.15%;
+    top: 64.39%;
+    width: 5.93%;
+    padding: 0;
+    border: 0;
+    background: none;
+    cursor: pointer;
+    transition: translate 180ms cubic-bezier(0.3, 1.3, 0.5, 1);
   }
 
-  .tt-head {
-    left: -2.2cqw;
-    top: 37cqw;
-    width: 4.2cqw;
-    height: 6cqw;
-    border-radius: 0.5cqw 0.5cqw 0.8cqw 0.8cqw;
-    background: linear-gradient(#0f0f0f 0 70%, #c8322a 71%);
-    transform: translateZ(2.2cqw) rotate(-14deg);
+  /* On = pushed down the slot. */
+  .tt-power[aria-pressed="true"] {
+    translate: 0 13%;
   }
 
-  /* Record: arm lifts and swings clear, then the record rises and fades. */
+  .tt-power:focus-visible {
+    outline: 2px solid black;
+    outline-offset: 2px;
+    border-radius: 0.4cqw;
+  }
+
+  /* Record lifts in from above and drops onto the spindle. */
   [data-phase="playing"] .tt-disc {
     opacity: 1;
   }
 
   [data-phase="entering"] .tt-disc {
-    animation: tt-drop 1200ms both;
+    animation: tt-drop 1100ms both;
   }
 
-  [data-phase="entering"] .tt-shadow {
-    animation: tt-shadow 1200ms both;
-  }
-
+  /* Arm swings clear first, then the record lifts away. */
   [data-phase="exiting"] .tt-disc {
-    animation: tt-drop 900ms 500ms both reverse;
-  }
-
-  [data-phase="exiting"] .tt-shadow {
-    animation: tt-shadow 900ms 500ms both reverse;
+    animation: tt-drop 800ms 550ms both reverse;
   }
 
   @keyframes tt-drop {
     0% {
       opacity: 0;
-      transform: translateZ(40cqw) rotateX(-6deg);
-      animation-timing-function: cubic-bezier(0.2, 0.7, 0.3, 1);
+      transform: translateY(-18%) scale(1.08);
+      filter: drop-shadow(0 4cqw 4cqw #0000);
+      animation-timing-function: cubic-bezier(0.2, 0.8, 0.2, 1);
     }
-    55% {
+    65% {
       opacity: 1;
-      transform: translateZ(5cqw) rotateX(-1.5deg);
-      animation-timing-function: cubic-bezier(0.55, 0, 0.9, 0.4);
-    }
-    78% {
-      transform: translateZ(1.4cqw);
-      animation-timing-function: ease-out;
+      transform: translateY(0) scale(1.05);
+      filter: drop-shadow(0 2.5cqw 2.5cqw #00000038);
+      animation-timing-function: cubic-bezier(0.5, 0, 0.9, 0.5);
     }
     88% {
-      transform: translateZ(2cqw) rotateX(0.5deg);
-      animation-timing-function: ease-in;
+      transform: scale(0.997);
+      filter: drop-shadow(0 0.3cqw 0.4cqw #0000004d);
     }
     100% {
       opacity: 1;
-      transform: translateZ(1.4cqw);
-    }
-  }
-
-  @keyframes tt-shadow {
-    0% {
-      opacity: 0;
-      scale: 1.2;
-      filter: blur(3cqw);
-    }
-    55% {
-      opacity: 0.7;
-      scale: 1.04;
-      filter: blur(1cqw);
-    }
-    78% {
-      opacity: 1;
-      scale: 1;
-      filter: blur(0.4cqw);
-    }
-    100% {
-      opacity: 0;
+      transform: none;
+      filter: drop-shadow(0 0.3cqw 0.4cqw #0000004d);
     }
   }
 
@@ -519,14 +227,12 @@ const stack = (n: number) => Array.from({ length: n }, (_, i) => i);
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .tt-arm,
-    [data-phase="playing"] .tt-arm,
-    .tt-knob > i:last-child {
+    .tt .tt-arm,
+    .tt-power {
       transition: none;
     }
     .tt-spin,
-    [data-phase] .tt-disc,
-    [data-phase] .tt-shadow {
+    [data-phase] .tt-disc {
       animation: none !important;
     }
   }

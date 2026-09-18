@@ -7,10 +7,12 @@ import { SONGS } from "./songs";
 export function mountPlayer(root: HTMLElement) {
   const buttons = [...root.querySelectorAll<HTMLButtonElement>("[data-song]")];
   const status = root.querySelector<HTMLElement>("[data-status]")!;
+  const power = root.querySelector<HTMLButtonElement>("[data-power]")!;
 
   let playing: number | null = null;
   let wanted: number | null = null;
   let running = false;
+  let last = 0; // what the power switch puts back on
 
   // One element reused for every preview. It is paused on exit, and the swap
   // below stops it when ClientRouter navigates away.
@@ -43,6 +45,7 @@ export function mountPlayer(root: HTMLElement) {
 
   const sync = () => {
     buttons.forEach((b, i) => b.setAttribute("aria-pressed", String(i === wanted)));
+    power.setAttribute("aria-pressed", String(wanted !== null));
     status.textContent =
       wanted === null ? "Nothing playing." : `Playing ${SONGS[wanted].title} by ${SONGS[wanted].artist}.`;
   };
@@ -80,32 +83,31 @@ export function mountPlayer(root: HTMLElement) {
   };
 
   // When the preview runs out, lift the record off like a finished side.
-  audio.addEventListener("ended", () => {
-    wanted = null;
+  audio.addEventListener("ended", () => choose(null));
+
+  const choose = (i: number | null) => {
+    // Safari only lets audio start from inside a gesture, and playback starts
+    // ~2s later after the animation. A silent play/pause on the first click
+    // unlocks the element for the rest of the visit.
+    const preview = i === null ? undefined : buttons[i].dataset.preview;
+    if (!primed && preview) {
+      primed = true;
+      audio.src = preview;
+      audio.muted = true;
+      audio
+        .play()
+        .then(() => audio.muted && audio.pause(), () => {})
+        .finally(() => (audio.muted = false));
+    }
+    if (i !== null) last = i;
+    wanted = i;
     sync();
     run();
-  });
+  };
 
-  buttons.forEach((button, i) =>
-    button.addEventListener("click", () => {
-      // Safari only lets audio start from inside a gesture, and playback starts
-      // ~2s later after the animation. A silent play/pause on the first click
-      // unlocks the element for the rest of the visit.
-      if (!primed && button.dataset.preview) {
-        primed = true;
-        audio.src = button.dataset.preview;
-        audio.muted = true;
-        audio
-          .play()
-          .then(() => audio.muted && audio.pause(), () => {})
-          .finally(() => (audio.muted = false));
-      }
-      // Clicking the song that is on stops it.
-      wanted = wanted === i ? null : i;
-      sync();
-      run();
-    }),
-  );
+  // Clicking the song that is on stops it.
+  buttons.forEach((button, i) => button.addEventListener("click", () => choose(wanted === i ? null : i)));
+  power.addEventListener("click", () => choose(wanted === null ? last : null));
 
   root.dataset.phase = "empty";
   sync();
