@@ -1,9 +1,7 @@
 import { SONGS } from "./songs";
 
-// Drives one record player. Visuals live in CSS, keyed on `data-phase`:
-//   empty → entering → playing → exiting → (entering the next record | empty)
-// This only flips phases and waits for each phase's finite animations to end,
-// so timing lives in one place: the CSS.
+// Visuals live in CSS, keyed on `data-phase`: empty → entering → playing → exiting.
+// This only flips phases and waits for each phase's animations to finish.
 export function mountPlayer(root: HTMLElement) {
   const buttons = [...root.querySelectorAll<HTMLButtonElement>("[data-song]")];
   const status = root.querySelector<HTMLElement>("[data-status]")!;
@@ -12,10 +10,8 @@ export function mountPlayer(root: HTMLElement) {
   let playing: number | null = null;
   let wanted: number | null = null;
   let running = false;
-  let last = 0; // what the power switch puts back on
+  let last = 0;
 
-  // One element reused for every preview. It is paused on exit, and the swap
-  // below stops it when ClientRouter navigates away.
   const audio = new Audio();
   audio.preload = "none";
   audio.volume = 0.7;
@@ -38,7 +34,8 @@ export function mountPlayer(root: HTMLElement) {
 
   const label = (i: number) => {
     const song = SONGS[i];
-    root.style.setProperty("--label", song.label);
+    if (song.label) root.style.setProperty("--label", song.label);
+    else root.style.removeProperty("--label");
     root.querySelector("[data-title]")!.textContent = song.title;
     root.querySelector("[data-artist]")!.textContent = song.artist;
   };
@@ -50,8 +47,7 @@ export function mountPlayer(root: HTMLElement) {
       wanted === null ? "Nothing playing." : `Playing ${SONGS[wanted].title} by ${SONGS[wanted].artist}.`;
   };
 
-  // Clicks can land mid-animation. Only the latest choice matters, so the loop
-  // keeps swapping records until what is on the platter is what was asked for.
+  // Clicks can land mid-animation; keep swapping until the platter matches the latest pick.
   const run = async () => {
     if (running) return;
     running = true;
@@ -66,11 +62,9 @@ export function mountPlayer(root: HTMLElement) {
         label(next);
         await enter("entering");
         playing = next;
-        // The needle lands, then the music starts.
         await enter("playing");
         const preview = buttons[next].dataset.preview;
         if (preview && wanted === next) {
-          // Same src keeps the buffered data; a replayed record starts over.
           if (audio.src !== preview) audio.src = preview;
           audio.currentTime = 0;
           audio.muted = false; // also tells a still-pending unlock not to pause us
@@ -82,13 +76,11 @@ export function mountPlayer(root: HTMLElement) {
     running = false;
   };
 
-  // When the preview runs out, lift the record off like a finished side.
   audio.addEventListener("ended", () => choose(null));
 
   const choose = (i: number | null) => {
-    // Safari only lets audio start from inside a gesture, and playback starts
-    // ~2s later after the animation. A silent play/pause on the first click
-    // unlocks the element for the rest of the visit.
+    // Safari only starts audio inside a gesture, but playback begins ~2s later.
+    // A silent play/pause on the first click unlocks the element.
     const preview = i === null ? undefined : buttons[i].dataset.preview;
     if (!primed && preview) {
       primed = true;
@@ -105,7 +97,6 @@ export function mountPlayer(root: HTMLElement) {
     run();
   };
 
-  // Clicking the song that is on stops it.
   buttons.forEach((button, i) => button.addEventListener("click", () => choose(wanted === i ? null : i)));
   power.addEventListener("click", () => choose(wanted === null ? last : null));
 

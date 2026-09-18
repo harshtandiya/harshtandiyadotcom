@@ -3,6 +3,8 @@ import "../styles/global.css";
 import { ClientRouter } from "astro:transitions";
 import Footer from "@/components/home/footer.astro";
 import Sidebar from "@/components/home/sidebar.astro";
+
+const { wide = false } = Astro.props as { wide?: boolean };
 ---
 
 <!doctype html>
@@ -81,7 +83,7 @@ import Sidebar from "@/components/home/sidebar.astro";
       });
     </script>
     <div
-      class="max-w-5xl w-full px-6 mr-auto min-h-screen flex flex-col md:flex-row md:gap-20"
+      class:list={["w-full px-6 mr-auto min-h-screen flex flex-col md:flex-row md:gap-20", wide ? "max-w-[88rem]" : "max-w-5xl"]}
     >
       <Sidebar />
       <div class="flex-1 min-w-0 flex flex-col md:py-12 min-h-0">

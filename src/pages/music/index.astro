@@ -6,7 +6,7 @@ import Turntable from "@/components/music/Turntable.astro";
 import SongList from "@/components/music/SongList.astro";
 ---
 
-<Layout>
+<Layout wide>
   <div class="animate-appear flex flex-col gap-4 items-start">
     <Image
       src={musicKitty}
@@ -14,10 +14,13 @@ import SongList from "@/components/music/SongList.astro";
       class="w-auto h-[63px]"
     />
     <h1 class="text-xl font-hand">Music</h1>
-    <p class="text-gray-500">A few songs on repeat. Pick one to put it on.</p>
-    <div data-player class="w-full max-w-2xl flex flex-col gap-6">
-      <Turntable />
-      <SongList />
+    <div data-player class="w-full grid gap-10 lg:grid-cols-2 lg:items-start">
+      <div class="lg:sticky lg:top-12">
+        <Turntable />
+      </div>
+      <div class="lg:order-first">
+        <SongList />
+      </div>
     </div>
   </div>
 </Layout>
