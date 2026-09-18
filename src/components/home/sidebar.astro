@@ -14,20 +14,21 @@ const isActive = (href: string) =>
 
 <aside
   transition:persist
-  class="w-full shrink-0 md:w-60 flex flex-col gap-6 md:gap-8 pt-8 md:py-12 md:sticky md:top-0 md:h-svh md:pr-10"
+  class="w-full shrink-0 md:w-40 flex flex-col items-start gap-6 md:gap-8 pt-8 pb-4 md:py-12 md:pl-8 md:sticky md:top-0 md:h-svh"
 >
   <a
     href="/"
-    class="no-style block"
+    class="no-style hidden md:block"
     data-cuelume-press
+    data-astro-prefetch="load"
     aria-label="Harsh Tandiya — home"
   >
-    <span class="block text-xl font-semibold leading-tight">Harsh Tandiya</span>
-    <span class="block mt-0.5 text-sm text-gray-500 leading-tight">Software Engineer</span>
+    <span class="block text-base font-semibold leading-tight">Harsh Tandiya</span>
+    <span class="block mt-0.5 text-xs text-gray-500 leading-tight">Software Engineer</span>
   </a>
 
   <nav aria-label="Primary">
-    <ul class="flex flex-row flex-wrap gap-x-1 gap-y-1 md:flex-col md:gap-1 font-hand">
+    <ul class="flex flex-row flex-wrap gap-x-4 gap-y-2 md:flex-col md:gap-1 font-hand">
       {
         NAV.map((item) => {
           const active = isActive(item.href);
@@ -36,10 +37,11 @@ const isActive = (href: string) =>
               <a
                 href={item.href}
                 data-nav-href={item.href}
+                data-astro-prefetch="load"
                 aria-current={active ? "page" : undefined}
                 data-cuelume-press
                 class:list={[
-                  "no-style inline-block rounded-md px-2 -mx-2 py-1 text-sm transition-colors duration-150",
+                  "no-style inline-block rounded-md px-2 -mx-2 py-1 text-xs md:text-sm transition-colors duration-150",
                   active
                     ? "text-black"
                     : "text-gray-500 hover:text-black",
@@ -54,51 +56,32 @@ const isActive = (href: string) =>
     </ul>
   </nav>
 
-  <div class="hidden md:flex flex-col items-start gap-2 text-sm">
-    <h2 class="text-xs font-medium uppercase tracking-wider text-gray-400">
-      Connect
-    </h2>
-    <a href="mailto:hi@harshtandiya.com" data-cuelume-press>
-      hi@harshtandiya.com
-    </a>
-    <div class="flex flex-col items-start gap-1.5">
-      <a
-        href="https://x.com/tandiyaharsh"
-        target="_blank"
-        rel="noopener noreferrer"
-        data-cuelume-press
-      >
-        X/Twitter
-      </a>
-      <a
-        href="https://github.com/harshtandiya"
-        target="_blank"
-        rel="noopener noreferrer"
-        data-cuelume-press
-      >
-        GitHub
-      </a>
-      <a
-        href="https://linkedin.com/in/harshtandiya"
-        target="_blank"
-        rel="noopener noreferrer"
-        data-cuelume-press
-      >
-        LinkedIn
-      </a>
-    </div>
-  </div>
-
-  <div class="hidden md:block">
+  <div class="hidden md:flex flex-col items-start gap-1 mt-auto text-xs text-gray-400">
+    <a href="mailto:hi@harshtandiya.com" data-cuelume-press>hi@harshtandiya.com</a>
+    <a
+      href="https://x.com/tandiyaharsh"
+      target="_blank"
+      rel="noopener noreferrer"
+      data-cuelume-press>X</a
+    >
+    <a
+      href="https://github.com/harshtandiya"
+      target="_blank"
+      rel="noopener noreferrer"
+      data-cuelume-press>GitHub</a
+    >
+    <a
+      href="https://linkedin.com/in/harshtandiya"
+      target="_blank"
+      rel="noopener noreferrer"
+      data-cuelume-press>LinkedIn</a
+    >
     <a
       href="https://creativecommons.org/licenses/by-nc-sa/4.0/?ref=chooser-v1"
       target="_blank"
       rel="noopener noreferrer"
-      data-cuelume-press
-      class="text-gray-400 text-xs font-sans"
+      data-cuelume-press>CC BY-NC-SA 4.0</a
     >
-      CC BY-NC-SA 4.0
-    </a>
   </div>
 </aside>
 
