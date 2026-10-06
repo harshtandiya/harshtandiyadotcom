@@ -2,6 +2,7 @@
 import Layout from "@/layouts/Layout.astro";
 import { Image } from "astro:assets";
 import bookKitty from "@/assets/neko/bookKitty.svg";
+import Shelf from "@/components/books/Shelf.astro";
 ---
 
 <Layout>
@@ -12,6 +13,13 @@ import bookKitty from "@/assets/neko/bookKitty.svg";
       class="w-auto h-[105px]"
     />
     <h1 class="text-xl font-hand">Books</h1>
-    <p class="text-gray-400 italic font-base">Something will come here eventually.</p>
+    <div class="w-full mt-16">
+      <Shelf />
+    </div>
   </div>
 </Layout>
+
+<script>
+  import { mountAll } from "@/components/books/shelf";
+  mountAll();
+</script>

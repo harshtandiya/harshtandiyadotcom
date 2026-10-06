@@ -1,0 +1,224 @@
+---
+import { Image } from "astro:assets";
+import BOOKS from "./books.json";
+
+// Real sizes in cm; width follows the cover's own aspect so nothing crops.
+const covers = import.meta.glob<{ default: ImageMetadata }>("/src/assets/books/*.jpg", { eager: true });
+const books = BOOKS.map((book) => {
+  const cover = covers[`/src/assets/books/${book.cover}`].default;
+  return { ...book, cover, width: (book.height * cover.width) / cover.height };
+});
+---
+
+<div data-shelf class="shelf">
+  <ul class="shelf-row">
+    {
+      books.map((book) => (
+        <li class="book-slot" style={`--w: ${book.width}; --h: ${book.height}; --d: ${book.depth}`}>
+          <button
+            type="button"
+            data-book
+            data-cuelume-press
+            aria-expanded="false"
+            aria-label={`${book.title} by ${book.author}`}
+            class="book"
+          >
+            <Image class="book-face book-cover" src={book.cover} alt="" width={400} />
+            <span class="book-face book-spine" style={`--spine: ${book.spine}; --ink: ${book.ink}`}>
+              <span class="book-spine-title">{book.title}</span>
+              <span class="book-spine-author">{book.author}</span>
+            </span>
+            <span class="book-face book-pages" />
+            <span class="book-face book-top" />
+            <span class="book-face book-back" style={`--spine: ${book.spine}`} />
+          </button>
+        </li>
+      ))
+    }
+  </ul>
+  <div class="shelf-plank"></div>
+</div>
+
+<style is:global>
+  .shelf {
+    --cm: 0.8rem;
+    --lean: 72deg; /* how far the spine turns toward us on the shelf */
+    perspective: 1400px;
+    perspective-origin: 50% 30%;
+  }
+
+  .shelf-row {
+    display: flex;
+    align-items: flex-end;
+    gap: 0.15rem;
+    padding-inline: 1.5rem;
+    transform-style: preserve-3d;
+    /* Books sit behind the row's z=0 plane, so it would eat their clicks. */
+    pointer-events: none;
+  }
+
+  .book-slot {
+    --W: calc(var(--w) * var(--cm));
+    --H: calc(var(--h) * var(--cm));
+    --D: calc(var(--d) * var(--cm));
+    position: relative;
+    /* Footprint of the turned book: cover foreshortened plus the spine. */
+    width: calc(var(--W) * cos(var(--lean)) + var(--D) * sin(var(--lean)));
+    height: var(--H);
+    transform-style: preserve-3d;
+  }
+
+  .book {
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    width: var(--W);
+    height: var(--H);
+    margin-left: calc(var(--W) / -2);
+    transform-style: preserve-3d;
+    pointer-events: auto;
+    cursor: pointer;
+    /* Pull the spine back onto the shelf line so every book's spine sits at z=0. */
+    translate: 0 0 calc(var(--W) / -2 * sin(var(--lean)));
+    rotate: y var(--lean);
+    transition:
+      translate 650ms var(--ease-out-strong),
+      rotate 650ms var(--ease-out-strong);
+  }
+
+  .book:hover,
+  .book:focus-visible {
+    translate: 0 -0.4rem calc(var(--W) / -2 * sin(var(--lean)) + 1rem);
+  }
+
+  .book[aria-expanded="true"] {
+    translate: 0 -2rem 9rem;
+    rotate: y -14deg;
+  }
+
+  .book:focus-visible {
+    outline: none;
+  }
+
+  .book:focus-visible .book-spine {
+    outline: 2px solid black;
+    outline-offset: 2px;
+  }
+
+  .book-face {
+    position: absolute;
+    display: block;
+    backface-visibility: hidden;
+  }
+
+  .book-cover {
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 0 2px 2px 0;
+    translate: 0 0 calc(var(--D) / 2);
+  }
+
+  /* Hinge crease and a soft sheen across the cover. */
+  .book::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: 0 2px 2px 0;
+    background:
+      linear-gradient(90deg, #0000 2.5%, #00000038 3.5%, #ffffff30 5%, #0000 8%),
+      linear-gradient(115deg, #ffffff1f 0%, #0000 40%, #0000 70%, #00000014 100%);
+    translate: 0 0 calc(var(--D) / 2 + 0.5px);
+    backface-visibility: hidden;
+    pointer-events: none;
+  }
+
+  .book-back {
+    inset: 0;
+    background: var(--spine);
+    rotate: y 180deg;
+    translate: 0 0 calc(var(--D) / -2);
+  }
+
+  .book-spine {
+    top: 0;
+    left: calc(var(--W) / 2 - var(--D) / 2);
+    width: var(--D);
+    height: 100%;
+    rotate: y -90deg;
+    translate: calc(var(--W) / -2) 0 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    padding-block: 0.9rem;
+    overflow: hidden;
+    writing-mode: vertical-rl;
+    color: var(--ink);
+    font-family: var(--font-sans);
+    /* Rounded spine: darker at both hinges, a highlight just off-center. */
+    background:
+      linear-gradient(90deg, #00000059, #0000 22%, #ffffff26 45%, #0000 70%, #00000066),
+      var(--spine);
+  }
+
+  .book-spine-title {
+    font-size: clamp(0.5rem, calc(var(--D) * 0.42), 0.8rem);
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .book-spine-author {
+    font-size: clamp(0.45rem, calc(var(--D) * 0.32), 0.65rem);
+    letter-spacing: 0.04em;
+    white-space: nowrap;
+    opacity: 0.8;
+  }
+
+  /* Paper: fine stripes for page edges, warmer toward the middle of the block. */
+  .book-pages {
+    top: 2px;
+    left: calc(var(--W) / 2 - var(--D) / 2);
+    width: var(--D);
+    height: calc(100% - 4px);
+    rotate: y 90deg;
+    translate: calc(var(--W) / 2 - 2px) 0 0;
+    background:
+      linear-gradient(90deg, #0000004d, #0000 25%, #0000 75%, #00000040),
+      repeating-linear-gradient(90deg, #f6f1e4 0 1px, #ddd4bf 1px 2px);
+  }
+
+  .book-top {
+    top: calc(var(--H) / 2 - var(--D) / 2);
+    left: 0;
+    width: calc(100% - 2px);
+    height: var(--D);
+    rotate: x 90deg;
+    translate: 0 calc(var(--H) / -2 + 1px) 0;
+    background: repeating-linear-gradient(0deg, #f6f1e4 0 1px, #ddd4bf 1px 2px);
+  }
+
+  .shelf-plank {
+    height: 1.1rem;
+    margin-top: -1px;
+    border-radius: 2px;
+    background:
+      linear-gradient(#ffffff40, #0000 30%),
+      repeating-linear-gradient(90deg, #0000 0 37px, #00000010 37px 39px, #0000 39px 83px),
+      linear-gradient(#b0815a, #8a5f3c);
+    box-shadow:
+      0 1px 0 #6b4529,
+      0 10px 18px -6px #0000004d;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .book {
+      transition: none;
+    }
+  }
+</style>
