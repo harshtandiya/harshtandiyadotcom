@@ -17,4 +17,6 @@ export default defineConfig({
 
   // Warm pages on hover; ClientRouter fetches before it swaps.
   prefetch: { prefetchAll: true },
+
+  redirects: { "/books": "/bookshelf" },
 });
