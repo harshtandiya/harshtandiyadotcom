@@ -1,71 +1,158 @@
 ---
 import { Image } from "astro:assets";
-import BOOKS from "./books.json";
+import ROWS from "./shelf.json";
 
-// Real sizes in cm; width follows the cover's own aspect so nothing crops.
-const covers = import.meta.glob<{ default: ImageMetadata }>("/src/assets/books/*.jpg", { eager: true });
-const books = BOOKS.map((book) => {
-  const cover = covers[`/src/assets/books/${book.cover}`].default;
-  return { ...book, cover, width: (book.height * cover.width) / cover.height };
+// Each row lists, left to right: books, props ({ decor, height }) and flexible
+// gaps ({ space }). Sizes are real cm; widths follow each image's own aspect.
+const images = import.meta.glob<{ default: ImageMetadata }>("/src/assets/{books,decor}/*.{jpg,png,webp}", {
+  eager: true,
 });
+const load = (path: string) => {
+  const image = images[`/src/assets/${path}`]?.default;
+  if (!image) throw new Error(`Shelf: no image at src/assets/${path}`);
+  return image;
+};
+const widthOf = (image: ImageMetadata, height: number) => (height * image.width) / image.height;
+
+const rows = ROWS.map((row) =>
+  row.map((item) => {
+    if ("cover" in item) {
+      const cover = load(`books/${item.cover}`);
+      return { ...item, kind: "book" as const, cover, width: widthOf(cover, item.height) };
+    }
+    if ("decor" in item) {
+      const src = load(`decor/${item.decor}`);
+      return { ...item, kind: "decor" as const, src, width: widthOf(src, item.height) };
+    }
+    return { ...item, kind: "space" as const };
+  }),
+);
 ---
 
 <div data-shelf class="shelf">
-  <ul class="shelf-row">
-    {
-      books.map((book) => (
-        <li class="book-slot" style={`--w: ${book.width}; --h: ${book.height}; --d: ${book.depth}`}>
-          <button
-            type="button"
-            data-book
-            data-cuelume-press
-            aria-expanded="false"
-            aria-label={`${book.title} by ${book.author}`}
-            class="book"
-          >
-            <Image class="book-face book-cover" src={book.cover} alt="" width={400} />
-            <span class="book-face book-spine" style={`--spine: ${book.spine}; --ink: ${book.ink}`}>
-              <span class="book-spine-title">{book.title}</span>
-              <span class="book-spine-author">{book.author}</span>
-            </span>
-            <span class="book-face book-pages" />
-            <span class="book-face book-top" />
-            <span class="book-face book-back" style={`--spine: ${book.spine}`} />
-          </button>
-        </li>
-      ))
-    }
-  </ul>
-  <div class="shelf-plank"></div>
+  {
+    rows.map((row) => (
+      <div class="shelf-level">
+        <ul class="shelf-row">
+          {row.map((item) => {
+            if (item.kind === "space") return <li class="shelf-space" aria-hidden="true" style={`--grow: ${item.space}`} />;
+            if (item.kind === "decor")
+              return (
+                <li class="decor" aria-hidden="true" style={`--w: ${item.width}; --h: ${item.height}`}>
+                  <Image src={item.src} alt="" width={600} />
+                </li>
+              );
+            const book = item;
+            return (
+              <li class="book-slot" style={`--w: ${book.width}; --h: ${book.height}; --d: ${book.depth}`}>
+                <button
+                  type="button"
+                  data-book
+                  data-cuelume-press
+                  aria-expanded="false"
+                  aria-label={`${book.title} by ${book.author}`}
+                  class="book-hit"
+                >
+                  <span class="book">
+                    <Image class="book-face book-cover" src={book.cover} alt="" width={400} />
+                    <span
+                      class:list={["book-face book-spine", book.spineStyle && `spine-${book.spineStyle}`]}
+                      style={`--spine: ${book.spine}; --ink: ${book.ink}`}
+                    >
+                      <span class="book-spine-title">{book.spineTitle ?? book.title}</span>
+                      <span class="book-spine-author">{book.author}</span>
+                    </span>
+                    <span class="book-face book-pages" />
+                    <span class="book-face book-top" />
+                    <span class="book-face book-back" style={`--spine: ${book.spine}`} />
+                  </span>
+                </button>
+              </li>
+            );
+          })}
+        </ul>
+        <div class="shelf-plank"></div>
+      </div>
+    ))
+  }
 </div>
 
 <style is:global>
   .shelf {
     --cm: 0.8rem;
-    --lean: 72deg; /* how far the spine turns toward us on the shelf */
-    perspective: 1400px;
-    perspective-origin: 50% 30%;
+    --lean: 90deg; /* spine square to the viewer, as books stand on a shelf */
+    display: flex;
+    flex-direction: column;
+    gap: 4rem;
+  }
+
+  .shelf-level {
+    position: relative;
+  }
+
+  /* An opened book flies forward; keep it above the rows painted after it. */
+  .shelf-level:has([aria-expanded="true"]) {
+    z-index: 1;
   }
 
   .shelf-row {
+    position: relative;
+    z-index: 1;
     display: flex;
     align-items: flex-end;
-    gap: 0.15rem;
+    gap: 0;
     padding-inline: 1.5rem;
-    transform-style: preserve-3d;
-    /* Books sit behind the row's z=0 plane, so it would eat their clicks. */
-    pointer-events: none;
+  }
+
+  .shelf-space {
+    flex-grow: var(--grow);
+  }
+
+  /* Cut-out photos standing on the plank, scaled to their real height. */
+  .decor {
+    flex-shrink: 0;
+    width: calc(var(--w) * var(--cm));
+    height: calc(var(--h) * var(--cm));
+    margin-inline: 0.5rem;
+  }
+
+  .decor img {
+    width: 100%;
+    height: 100%;
+    filter: drop-shadow(0 4px 4px #00000040);
   }
 
   .book-slot {
     --W: calc(var(--w) * var(--cm));
     --H: calc(var(--h) * var(--cm));
-    --D: calc(var(--d) * var(--cm));
+    /* Thin paperbacks get a floor so the spine stays readable and clickable. */
+    --D: max(var(--d) * var(--cm), 1.5rem);
     position: relative;
+    flex-shrink: 0;
     /* Footprint of the turned book: cover foreshortened plus the spine. */
     width: calc(var(--W) * cos(var(--lean)) + var(--D) * sin(var(--lean)));
     height: var(--H);
-    transform-style: preserve-3d;
+  }
+
+  /* Flat, spine-sized click target. The 3D book inside is edge-on at rest and
+     would leave almost nothing to hit. Each book also gets its own eye, so at
+     rest every spine is seen head-on. */
+  .book-hit {
+    position: absolute;
+    inset: 0;
+    display: block;
+    cursor: pointer;
+    perspective: 1400px;
+    perspective-origin: 50% 30%;
+  }
+
+  /* Each slot paints flat in DOM order; lift the active book over its neighbours. */
+  .book-slot:has(.book-hit:hover, .book-hit:focus-visible) {
+    z-index: 1;
+  }
+
+  .book-slot:has([aria-expanded="true"]) {
+    z-index: 2;
   }
 
   .book {
@@ -76,8 +163,6 @@ const books = BOOKS.map((book) => {
     height: var(--H);
     margin-left: calc(var(--W) / -2);
     transform-style: preserve-3d;
-    pointer-events: auto;
-    cursor: pointer;
     /* Pull the spine back onto the shelf line so every book's spine sits at z=0. */
     translate: 0 0 calc(var(--W) / -2 * sin(var(--lean)));
     rotate: y var(--lean);
@@ -86,21 +171,21 @@ const books = BOOKS.map((book) => {
       rotate 650ms var(--ease-out-strong);
   }
 
-  .book:hover,
-  .book:focus-visible {
+  .book-hit:hover .book,
+  .book-hit:focus-visible .book {
     translate: 0 -0.4rem calc(var(--W) / -2 * sin(var(--lean)) + 1rem);
   }
 
-  .book[aria-expanded="true"] {
+  [aria-expanded="true"] .book {
     translate: 0 -2rem 9rem;
     rotate: y -14deg;
   }
 
-  .book:focus-visible {
+  .book-hit:focus-visible {
     outline: none;
   }
 
-  .book:focus-visible .book-spine {
+  .book-hit:focus-visible .book-spine {
     outline: 2px solid black;
     outline-offset: 2px;
   }
@@ -152,11 +237,13 @@ const books = BOOKS.map((book) => {
     align-items: center;
     justify-content: space-between;
     gap: 0.5rem;
-    padding-block: 0.9rem;
+    /* Vertical text: inline padding is the spine's top and bottom. */
+    padding-inline: 1.4rem;
     overflow: hidden;
     writing-mode: vertical-rl;
     color: var(--ink);
-    font-family: var(--font-sans);
+    /* Default spine face: Timeless Grotesk. Styles below swap it per cover. */
+    font-family: var(--font-grotesk);
     /* Rounded spine: darker at both hinges, a highlight just off-center. */
     background:
       linear-gradient(90deg, #00000059, #0000 22%, #ffffff26 45%, #0000 70%, #00000066),
@@ -178,6 +265,43 @@ const books = BOOKS.map((book) => {
     letter-spacing: 0.04em;
     white-space: nowrap;
     opacity: 0.8;
+  }
+
+  /* `spineStyle` in shelf.json picks one of these, matched to the lettering
+     on the cover. All Timeless; `STYL` 100 is Sans (vs Grotesk) or Serif Text. */
+  .spine-vintage .book-spine-title {
+    font-family: var(--font-serif);
+    font-weight: 400;
+    letter-spacing: 0.01em;
+    text-transform: none;
+  }
+
+  .spine-vintage .book-spine-author {
+    font-weight: 500;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    opacity: 1;
+  }
+
+  /* Penguin Select Classics: yellow spine, serif title, script author (Serif
+     italic is the nearest Timeless has to the script). */
+  .spine-penguin-select .book-spine-title {
+    font-family: var(--font-serif);
+    font-weight: 400;
+    letter-spacing: 0.02em;
+  }
+
+  .spine-penguin-select .book-spine-author {
+    font-family: var(--font-serif);
+    font-style: italic;
+    letter-spacing: 0;
+    opacity: 1;
+  }
+
+  .spine-death-note .book-spine-title {
+    font-family: var(--font-serif);
+    font-size: clamp(0.6rem, calc(var(--D) * 0.55), 1.05rem);
+    letter-spacing: 0.04em;
   }
 
   /* Paper: fine stripes for page edges, warmer toward the middle of the block. */
@@ -203,17 +327,28 @@ const books = BOOKS.map((book) => {
     background: repeating-linear-gradient(0deg, #f6f1e4 0 1px, #ddd4bf 1px 2px);
   }
 
+  /* The plank seen from a little above: its top surface, which the books
+     stand on, then the front edge. Tapered sides fake the perspective. */
   .shelf-plank {
-    height: 1.1rem;
-    margin-top: -1px;
-    border-radius: 2px;
+    --top: 1.25rem;
+    --edge: 1.1rem;
+    height: calc(var(--top) + var(--edge));
+    /* Tuck under the row so things stand partway onto the top, not on its back edge. */
+    margin-top: calc(var(--top) * -0.6);
+    filter: drop-shadow(0 10px 10px #0000003d);
+  }
+
+  .shelf-plank::before {
+    content: "";
+    display: block;
+    height: 100%;
+    clip-path: polygon(0.75rem 0, calc(100% - 0.75rem) 0, 100% var(--top), 100% 100%, 0 100%, 0 var(--top));
     background:
-      linear-gradient(#ffffff40, #0000 30%),
+      linear-gradient(#0000004d, #0000 40%) 0 0 / 100% var(--top) no-repeat,
+      linear-gradient(#0000 calc(var(--top) - 1px), #ffffff59 calc(var(--top) - 1px) calc(var(--top) + 1px), #0000 0),
+      linear-gradient(#0000 var(--top), #ffffff26 var(--top), #0000 calc(var(--top) + 0.35rem)),
       repeating-linear-gradient(90deg, #0000 0 37px, #00000010 37px 39px, #0000 39px 83px),
-      linear-gradient(#b0815a, #8a5f3c);
-    box-shadow:
-      0 1px 0 #6b4529,
-      0 10px 18px -6px #0000004d;
+      linear-gradient(#a8784f, #c39468 var(--top), #b0815a var(--top), #8a5f3c);
   }
 
   @media (prefers-reduced-motion: reduce) {

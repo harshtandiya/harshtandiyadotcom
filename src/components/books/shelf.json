@@ -1,0 +1,35 @@
+[
+  [
+    {
+      "title": "The Stranger",
+      "author": "Albert Camus",
+      "cover": "9780679720201.jpg",
+      "height": 20.3,
+      "depth": 1.1,
+      "spine": "#f7f6f2",
+      "ink": "#1a1a1a",
+      "spineStyle": "vintage"
+    },
+    {
+      "title": "1984",
+      "author": "George Orwell",
+      "cover": "1984-penguin-select.jpg",
+      "height": 19,
+      "depth": 2.2,
+      "spine": "#f2e62e",
+      "ink": "#2b2620",
+      "spineStyle": "penguin-select"
+    },
+    {
+      "title": "Death Note Black Edition, Vol. 1",
+      "author": "Tsugumi Ohba",
+      "cover": "9781421539645.jpg",
+      "height": 21,
+      "depth": 2.8,
+      "spine": "#121212",
+      "ink": "#f2f2f2",
+      "spineTitle": "Death Note",
+      "spineStyle": "death-note"
+    }
+  ]
+]
