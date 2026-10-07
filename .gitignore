@@ -27,3 +27,5 @@ pnpm-debug.log*
 .claude/
 CLAUDE.md
 skills-lock.json
+# Timeless fonts: licence forbids public repos (section 6). Get them from timeless.co.
+public/fonts/timeless/
