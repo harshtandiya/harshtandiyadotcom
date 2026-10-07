@@ -1,9 +1,13 @@
 ---
 import { Image } from "astro:assets";
-import ROWS from "./shelf.json";
+import SHELF from "./shelf.json";
 
-// Each row lists, left to right: books, props ({ decor, height }) and flexible
-// gaps ({ space }). Sizes are real cm; widths follow each image's own aspect.
+// shelf.json is a list of batches, one per row. Every item has a `pose`:
+//   0 book, spine-on        2 book, cover facing out
+//   1 book, leaning right   3 book, leaning left        4 prop (PNG)
+// e.g. poses [4, 0, 1, 2, 4]: prop, spine, a book leaning onto a face-out
+// cover, prop. Sizes are real cm; widths follow each image's own aspect. A
+// prop's `drop` is how far its image runs below the shelf line (baked shadow).
 const images = import.meta.glob<{ default: ImageMetadata }>("/src/assets/{books,decor}/*.{jpg,png,webp}", {
   eager: true,
 });
@@ -14,37 +18,58 @@ const load = (path: string) => {
 };
 const widthOf = (image: ImageMetadata, height: number) => (height * image.width) / image.height;
 
-const rows = ROWS.map((row) =>
-  row.map((item) => {
-    if ("cover" in item) {
-      const cover = load(`books/${item.cover}`);
-      return { ...item, kind: "book" as const, cover, width: widthOf(cover, item.height) };
-    }
-    if ("decor" in item) {
+const PROP = 4;
+
+const rows = SHELF.map((batch) =>
+  batch.map((item) => {
+    if (item.pose === PROP) {
+      if (!("decor" in item)) throw new Error(`Shelf: pose 4 needs a "decor" image`);
       const src = load(`decor/${item.decor}`);
-      return { ...item, kind: "decor" as const, src, width: widthOf(src, item.height) };
+      const drop = item.drop ?? 0;
+      return { ...item, kind: "prop" as const, src, drop, width: widthOf(src, item.height + drop) };
     }
-    return { ...item, kind: "space" as const };
+    if (!("cover" in item)) throw new Error(`Shelf: pose ${item.pose} needs a book`);
+    const cover = load(`books/${item.cover}`);
+    return { ...item, kind: "book" as const, cover, width: widthOf(cover, item.height) };
   }),
 );
+
+// Scale (px per cm) so the widest row fits its container on any screen, capped
+// at 0.8rem. Each row needs fitCm·cm + fixedRem: spines count both their cm
+// depth and their 1.5rem minimum, so the estimate errs on the roomy side.
+const TIP = (12 * Math.PI) / 180; // matches --tip
+const footprint = (item: (typeof rows)[number][number]) => {
+  if (item.kind === "prop") return item.width;
+  if (item.pose === 2) return item.width;
+  if (item.pose === 0) return item.depth;
+  return item.depth * Math.cos(TIP) + item.height * Math.sin(TIP);
+};
+const fits = rows.map((row) => {
+  const fitCm = row.reduce((sum, item) => sum + footprint(item), 0);
+  const spines = row.filter((item) => item.kind === "book" && item.pose !== 2).length;
+  const props = row.length - row.filter((item) => item.kind === "book").length;
+  const fixedRem = 3 + spines * 1.5 + props * 2.5; // row padding, spine minimums, prop margins
+  return `(100cqi - ${fixedRem}rem) / ${fitCm.toFixed(2)}`;
+});
+const cm = `clamp(0.3rem, min(${fits.join(", ")}), 0.8rem)`;
 ---
 
-<div data-shelf class="shelf">
+<div class="bookshelf">
+<div data-shelf class="shelf" style={`--cm: ${cm}`}>
   {
     rows.map((row) => (
       <div class="shelf-level">
         <ul class="shelf-row">
           {row.map((item) => {
-            if (item.kind === "space") return <li class="shelf-space" aria-hidden="true" style={`--grow: ${item.space}`} />;
-            if (item.kind === "decor")
+            if (item.kind === "prop")
               return (
-                <li class="decor" aria-hidden="true" style={`--w: ${item.width}; --h: ${item.height}`}>
+                <li class="decor" aria-hidden="true" style={`--w: ${item.width}; --h: ${item.height}; --drop: ${item.drop}`}>
                   <Image src={item.src} alt="" width={600} />
                 </li>
               );
             const book = item;
             return (
-              <li class="book-slot" style={`--w: ${book.width}; --h: ${book.height}; --d: ${book.depth}`}>
+              <li class={`book-slot pose-${book.pose}`} style={`--w: ${book.width}; --h: ${book.height}; --d: ${book.depth}`}>
                 <button
                   type="button"
                   data-book
@@ -76,10 +101,23 @@ const rows = ROWS.map((row) =>
     ))
   }
 </div>
+</div>
 
 <style is:global>
+  /* Registered so --cm resolves once on .shelf (cqi against .bookshelf) and
+     descendants inherit plain px. Unregistered, cqi would re-resolve at each
+     use, and inside vertical spines "inline" means height. */
+  @property --cm {
+    syntax: "<length>";
+    inherits: true;
+    initial-value: 12.8px; /* must be absolute; 0.8rem at 16px */
+  }
+
+  .bookshelf {
+    container-type: inline-size;
+  }
+
   .shelf {
-    --cm: 0.8rem;
     --lean: 90deg; /* spine square to the viewer, as books stand on a shelf */
     display: flex;
     flex-direction: column;
@@ -104,22 +142,19 @@ const rows = ROWS.map((row) =>
     padding-inline: 1.5rem;
   }
 
-  .shelf-space {
-    flex-grow: var(--grow);
-  }
-
-  /* Cut-out photos standing on the plank, scaled to their real height. */
+  /* Cut-out images standing on the plank, scaled to their real height. They
+     carry their own shadow; `--drop` lets it run onto the plank's top. */
   .decor {
     flex-shrink: 0;
     width: calc(var(--w) * var(--cm));
-    height: calc(var(--h) * var(--cm));
-    margin-inline: 0.5rem;
+    height: calc((var(--h) + var(--drop)) * var(--cm));
+    margin-bottom: calc(var(--drop) * var(--cm) * -1);
+    margin-inline: 1.25rem;
   }
 
   .decor img {
     width: 100%;
     height: 100%;
-    filter: drop-shadow(0 4px 4px #00000040);
   }
 
   .book-slot {
@@ -127,11 +162,41 @@ const rows = ROWS.map((row) =>
     --H: calc(var(--h) * var(--cm));
     /* Thin paperbacks get a floor so the spine stays readable and clickable. */
     --D: max(var(--d) * var(--cm), 1.5rem);
+    /* Footprint of the turned book: cover foreshortened plus the spine. */
+    --fw: calc(var(--W) * cos(var(--lean)) + var(--D) * sin(var(--lean)));
+    /* How far a leaning book tips (always positive; the pose sets the side). */
+    --tip: 0deg;
     position: relative;
     flex-shrink: 0;
-    /* Footprint of the turned book: cover foreshortened plus the spine. */
-    width: calc(var(--W) * cos(var(--lean)) + var(--D) * sin(var(--lean)));
-    height: var(--H);
+    width: calc(var(--fw) * cos(var(--tip)) + var(--H) * sin(var(--tip)));
+    height: calc(var(--H) * cos(var(--tip)) + var(--fw) * sin(var(--tip)));
+  }
+
+  /* Batch poses. Leaners pivot on the corner that stays on the plank. */
+  .pose-1,
+  .pose-3 {
+    --tip: 12deg;
+  }
+
+  .pose-2 {
+    --lean: 0deg;
+  }
+
+  .pose-1 .book-hit {
+    left: calc(var(--fw) * cos(var(--tip)) - var(--fw));
+    transform-origin: bottom right;
+    rotate: var(--tip);
+  }
+
+  .pose-3 .book-hit {
+    left: calc(var(--H) * sin(var(--tip)));
+    transform-origin: bottom left;
+    rotate: calc(var(--tip) * -1);
+  }
+
+  /* An opened book straightens up as it comes out. */
+  .book-slot .book-hit[aria-expanded="true"] {
+    rotate: 0deg;
   }
 
   /* Flat, spine-sized click target. The 3D book inside is edge-on at rest and
@@ -139,9 +204,13 @@ const rows = ROWS.map((row) =>
      rest every spine is seen head-on. */
   .book-hit {
     position: absolute;
-    inset: 0;
+    bottom: 0;
+    left: 0;
+    width: var(--fw);
+    height: var(--H);
     display: block;
     cursor: pointer;
+    transition: rotate 650ms var(--ease-out-strong);
     perspective: 1400px;
     perspective-origin: 50% 30%;
   }
@@ -236,9 +305,9 @@ const rows = ROWS.map((row) =>
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 0.5rem;
+    gap: max(0.25rem, 0.6 * var(--cm));
     /* Vertical text: inline padding is the spine's top and bottom. */
-    padding-inline: 1.4rem;
+    padding-inline: max(0.4rem, 1.75 * var(--cm));
     overflow: hidden;
     writing-mode: vertical-rl;
     color: var(--ink);
@@ -250,8 +319,11 @@ const rows = ROWS.map((row) =>
       var(--spine);
   }
 
+  /* Short spines keep the title; the author gives way first. */
   .book-spine-title {
-    font-size: clamp(0.5rem, calc(var(--D) * 0.42), 0.8rem);
+    flex: 0 0 auto;
+    max-inline-size: 100%;
+    font-size: clamp(0.45rem, min(var(--D) * 0.42, 1.1 * var(--cm)), 0.8rem);
     font-weight: 700;
     letter-spacing: 0.08em;
     text-transform: uppercase;
@@ -261,7 +333,11 @@ const rows = ROWS.map((row) =>
   }
 
   .book-spine-author {
-    font-size: clamp(0.45rem, calc(var(--D) * 0.32), 0.65rem);
+    flex: 0 1 auto;
+    min-inline-size: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-size: clamp(0.4rem, min(var(--D) * 0.32, 0.85 * var(--cm)), 0.65rem);
     letter-spacing: 0.04em;
     white-space: nowrap;
     opacity: 0.8;
@@ -300,7 +376,7 @@ const rows = ROWS.map((row) =>
 
   .spine-death-note .book-spine-title {
     font-family: var(--font-serif);
-    font-size: clamp(0.6rem, calc(var(--D) * 0.55), 1.05rem);
+    font-size: clamp(0.5rem, min(var(--D) * 0.55, 1.4 * var(--cm)), 1.05rem);
     letter-spacing: 0.04em;
   }
 
@@ -352,7 +428,8 @@ const rows = ROWS.map((row) =>
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .book {
+    .book,
+    .book-hit {
       transition: none;
     }
   }
