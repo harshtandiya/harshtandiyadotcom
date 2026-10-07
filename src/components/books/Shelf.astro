@@ -374,6 +374,20 @@ const cm = `clamp(0.3rem, min(${fits.join(", ")}), 0.8rem)`;
     opacity: 1;
   }
 
+  /* Vincent by Himself: classic serif, "VINCENT" in caps, "by Himself" in
+     lower case, white on the cover's stormy blue. */
+  .spine-vincent .book-spine-title,
+  .spine-vincent .book-spine-author {
+    font-family: var(--font-serif);
+    font-weight: 400;
+    text-transform: none;
+    opacity: 1;
+  }
+
+  .spine-vincent .book-spine-title {
+    letter-spacing: 0.02em;
+  }
+
   .spine-death-note .book-spine-title {
     font-family: var(--font-serif);
     font-size: clamp(0.5rem, min(var(--D) * 0.55, 1.4 * var(--cm)), 1.05rem);

@@ -1,6 +1,12 @@
 [
   [
     {
+      "pose": 4,
+      "decor": "potted-plant-04.png",
+      "height": 13.1,
+      "drop": 0.7
+    },
+    {
       "pose": 0,
       "title": "The Stranger",
       "author": "Albert Camus",
@@ -12,7 +18,7 @@
       "spineStyle": "vintage"
     },
     {
-      "pose": 1,
+      "pose": 0,
       "title": "1984",
       "author": "George Orwell",
       "cover": "1984-penguin-select.jpg",
@@ -23,7 +29,7 @@
       "spineStyle": "penguin-select"
     },
     {
-      "pose": 2,
+      "pose": 1,
       "title": "Death Note Black Edition, Vol. 1",
       "author": "Tsugumi Ohba",
       "cover": "9781421539645.jpg",
@@ -35,10 +41,16 @@
       "spineStyle": "death-note"
     },
     {
-      "pose": 4,
-      "decor": "potted-plant-04.png",
-      "height": 13.1,
-      "drop": 0.7
+      "pose": 2,
+      "title": "Vincent by Himself",
+      "author": "Bruce Bernard",
+      "cover": "9780821216088.jpg",
+      "height": 32.4,
+      "depth": 3.2,
+      "spine": "#184c6e",
+      "ink": "#f4f1ea",
+      "spineStyle": "vincent",
+      "spineTitle": "VINCENT by Himself"
     }
   ]
 ]
